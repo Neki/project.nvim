@@ -2,9 +2,17 @@ local M = {}
 
 ---@class ProjectOptions
 M.defaults = {
-  -- Manual mode doesn't automatically change your root directory, so you have
-  -- the option to manually do so using `:ProjectRoot` command.
+  -- If set to true, don't automatically detect the current project root.
+  -- When manual mode is enabled:
+  -- 1. The working directory isn't changed when you open a file inside an existing project.
+  --    Use :ProjectRoot to manually change the working directory to the project root.
+  -- 2. New projects are not automatically added when opening a file. Use :AddProject to
+  --    manually add a project.
   manual_mode = false,
+
+  -- When opening a file, automatically change the current working directory to the project root.
+  -- If set to false, you can manually change the working directory using the :ProjectRoot command.
+  auto_sync_cwd = true,
 
   -- Methods of detecting the root directory. **"lsp"** uses the native neovim
   -- lsp, while **"pattern"** uses vim-rooter like glob pattern matching. Here

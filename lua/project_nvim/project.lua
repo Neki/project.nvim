@@ -7,7 +7,6 @@ local M = {}
 
 -- Internal states
 M.attached_lsp = false
-M.last_project = nil
 
 function M.find_lsp_root()
   -- Get lsp client for current buffer
@@ -169,11 +168,12 @@ function M.attach_to_lsp()
   M.attached_lsp = true
 end
 
+function M.register_project(dir)
+  table.insert(history.session_projects, dir)
+end
+
 function M.set_pwd(dir, method)
   if dir ~= nil then
-    M.last_project = dir
-    table.insert(history.session_projects, dir)
-
     if vim.fn.getcwd() ~= dir then
       local scope_chdir = config.options.scope_chdir
       if scope_chdir == 'global' then
@@ -232,6 +232,18 @@ function M.is_file()
 end
 
 function M.on_buf_enter()
+  local root, method = M.update_current_project()
+  if config.options.auto_sync_cwd then
+    M.set_pwd(root, method)
+  end
+end
+
+function M.update_cwd_with_current_project_root()
+  local root, method = M.update_current_project()
+  M.set_pwd(root, method)
+end
+
+function M.update_current_project()
   if vim.v.vim_did_enter == 0 then
     return
   end
@@ -246,12 +258,16 @@ function M.on_buf_enter()
   end
 
   local root, method = M.get_project_root()
-  M.set_pwd(root, method)
+  M.register_project(root)
+  return root, method
 end
 
 function M.add_project_manually()
   local current_dir = vim.fn.expand("%:p:h", true)
-  M.set_pwd(current_dir, 'manual')
+  M.register_project(current_dir)
+  if config.options.auto_sync_cwd then
+    M.set_pwd(current_dir, 'manual')
+  end
 end
 
 function M.init()
@@ -265,7 +281,7 @@ function M.init()
   end
 
   vim.cmd([[
-    command! ProjectRoot lua require("project_nvim.project").on_buf_enter()
+    command! ProjectRoot lua require("project_nvim.project").update_cwd_with_current_project_root()
     command! AddProject lua require("project_nvim.project").add_project_manually()
   ]])
 
