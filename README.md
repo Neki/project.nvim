@@ -4,7 +4,9 @@
 superior project management.
 
 This is a fork of the [original plugin](https://github.com/ahmedkhalf/project.nvim) with some additional
-features, since the upsteam repository seems unmaintained.
+features, since the upstream repository seems unmaintained.
+Notably, this version supports deactivating the automatic working directory update when opening a project
+file.
 
 ![Telescope Integration](https://user-images.githubusercontent.com/36672196/129409509-62340f10-4dd0-4c1a-9252-8bfedf2a9945.png)
 
@@ -14,49 +16,33 @@ features, since the upsteam repository seems unmaintained.
 
 ## ✨ Features
 
-- Automagically cd to project directory using nvim lsp
-  - Dependency free, does not rely on lspconfig
-- If no lsp then uses pattern matching to cd to root directory
+- Automatically detect new project roots when opening a file
+  - Detection methods: nvim built-in LSP (no dependency on lspconfig), file patterns
 - Telescope integration `:Telescope projects`
-  - Access your recently opened projects from telescope!
-  - Asynchronous file io so it will not slow down vim when reading the history
+  - Access your recently opened projects from telescope.
+  - Asynchronous file I/O: will not slow down vim when reading the history
     file on startup.
-- ~~Nvim-tree.lua support/integration~~
-  - Please add the following to your config instead:
-    ```vim
-    " Vim Script
-    lua << EOF
-    require("nvim-tree").setup({
-      sync_root_with_cwd = true,
-      respect_buf_cwd = true,
-      update_focused_file = {
-        enable = true,
-        update_root = true
-      },
-    })
-    EOF
-    ```
-    ```lua
-    -- lua
-    require("nvim-tree").setup({
-      sync_root_with_cwd = true,
-      respect_buf_cwd = true,
-      update_focused_file = {
-        enable = true,
-        update_root = true
-      },
-    })
-    ```
+- Automatically change the current working directory when opening a project
 
 ## 📦 Installation
 
 Install the plugin with your preferred package manager:
 
+### [Lazy](https://github.com/folke/lazy.nvim)
+
+```lua
+{
+    "Neki/project.nvim",
+    main="project_nvim",
+    opts = {},
+    event = "VeryLazy",
+}
+```
+
 ### [vim-plug](https://github.com/junegunn/vim-plug)
 
 ```vim
-" Vim Script
-Plug 'ahmedkhalf/project.nvim'
+Plug 'Neki/project.nvim'
 
 lua << EOF
   require("project_nvim").setup {
@@ -70,7 +56,6 @@ EOF
 ### [packer](https://github.com/wbthomason/packer.nvim)
 
 ```lua
--- Lua
 use {
   "Neki/project.nvim",
   config = function()
@@ -143,8 +128,7 @@ called for the plugin to start.
 
 ### Pattern Matching
 
-**project.nvim**'s pattern engine uses the same expressions as vim-rooter, but
-for your convenience, I will copy paste them here:
+**project.nvim**'s pattern engine uses the same expressions as `vim-rooter`:
 
 To specify the root is a certain directory, prefix it with `=`.
 
